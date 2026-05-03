@@ -31,40 +31,38 @@ async function fetchCat() {
     catImage.classList.remove('loaded');
 
     try {
-        const response = await fetch(API_URL, { credentials: 'include' });
+        const response = await fetch(API_URL, { 
+            method: 'GET',
+            headers: { 'accept': 'application/json' }
+        });
+        
         if (!response.ok) throw new Error('Failed to fetch cat');
         
         const result = await response.json();
         const data = result.data;
 
-        if (!data || !data.url) throw new Error('Invalid data received');
+        if (!data) throw new Error('Invalid data received');
 
-        currentCatUrl = data.url;
+        // Update: The API response structure matches the user's provided JSON
+        // data.image is the URL, and other fields are direct properties of data
+        currentCatUrl = data.image || data.url; // Support both just in case
         
-        // Handle breed info
-        const breed = (data.breeds && data.breeds.length > 0) ? data.breeds[0] : null;
+        if (!currentCatUrl) throw new Error('No image URL found');
+
+        breedName.textContent = data.name || 'Unknown Breed';
+        origin.textContent = data.origin ? `Origin: ${data.origin}` : '';
+        description.textContent = data.description || 'No description available for this cutie.';
         
-        if (breed) {
-            breedName.textContent = breed.name || 'Unknown Breed';
-            origin.textContent = breed.origin ? `Origin: ${breed.origin}` : '';
-            description.textContent = breed.description || '';
-            
-            // Temperament tags
-            temperamentTags.innerHTML = '';
-            if (breed.temperament) {
-                const tags = breed.temperament.split(',').map(t => t.trim());
-                tags.forEach(tag => {
-                    const pill = document.createElement('span');
-                    pill.className = 'bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full';
-                    pill.textContent = tag;
-                    temperamentTags.appendChild(pill);
-                });
-            }
-        } else {
-            breedName.textContent = 'Unknown Breed';
-            origin.textContent = '';
-            description.textContent = 'No description available for this cutie.';
-            temperamentTags.innerHTML = '';
+        // Temperament tags
+        temperamentTags.innerHTML = '';
+        if (data.temperament) {
+            const tags = data.temperament.split(',').map(t => t.trim());
+            tags.forEach(tag => {
+                const pill = document.createElement('span');
+                pill.className = 'bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full';
+                pill.textContent = tag;
+                temperamentTags.appendChild(pill);
+            });
         }
 
         // Set image source and wait for load
@@ -76,11 +74,15 @@ async function fetchCat() {
         
         // Fallback for image loading error
         catImage.onerror = () => {
-            throw new Error('Failed to load image');
+            console.error('Failed to load image from:', currentCatUrl);
+            errorMessage.textContent = "Image failed to load. Try another cat! 🐱";
+            errorMessage.classList.remove('hidden');
+            toggleLoading(false);
         };
 
     } catch (error) {
         console.error('Error fetching cat:', error);
+        errorMessage.textContent = "Couldn't fetch cat. Try again.";
         errorMessage.classList.remove('hidden');
         toggleLoading(false);
     }
