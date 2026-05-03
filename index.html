@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Cat Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f0f4f0;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        .cat-img {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .cat-img.loaded {
+            opacity: 1;
+        }
+        .btn-primary {
+            background-color: #2d6a4f;
+        }
+        .btn-primary:hover {
+            background-color: #1b4332;
+        }
+        .skeleton {
+            background-color: #e5e7eb;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Main Card -->
+        <div class="bg-white rounded-[16px] shadow-lg p-6 md:p-8 mb-8">
+            <!-- Image Container -->
+            <div id="image-container" class="relative w-full max-w-[500px] mx-auto aspect-square bg-gray-200 rounded-lg overflow-hidden mb-6">
+                <div id="placeholder" class="skeleton absolute inset-0 w-full h-full"></div>
+                <img id="cat-image" src="" alt="Random Cat" class="cat-img absolute inset-0 w-full h-full object-cover">
+            </div>
+
+            <!-- Cat Info -->
+            <div id="cat-info" class="space-y-4">
+                <h1 id="breed-name" class="text-2xl font-bold text-gray-800">Loading...</h1>
+                <div id="temperament-tags" class="flex flex-wrap gap-2">
+                    <!-- Pills go here -->
+                </div>
+                <p id="origin" class="text-sm text-gray-500 font-medium"></p>
+                <p id="description" class="text-gray-600 leading-relaxed"></p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-md text-center">
+                Couldn't fetch cat. Try again.
+                <button onclick="fetchCat()" class="underline ml-2 font-semibold">Retry</button>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-8 flex items-center gap-4">
+                <button id="new-cat-btn" class="btn-primary text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btn-text">New Cat 🐱</span>
+                    <svg id="spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+                <button id="save-cat-btn" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-full font-semibold text-sm transition-colors">
+                    Save
+                </button>
+            </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div id="gallery-container" class="hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Saved Cats</h2>
+            <div id="gallery-grid" class="flex flex-wrap gap-3">
+                <!-- Thumbnails go here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4 cursor-pointer">
+        <div class="relative max-w-4xl w-full cursor-default">
+            <button id="close-modal" class="absolute -top-12 right-0 text-white text-4xl hover:text-gray-300 transition-colors">&times;</button>
+            <img id="modal-image" src="" alt="Full size cat" class="w-full h-auto max-h-[85vh] object-contain rounded-lg">
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
